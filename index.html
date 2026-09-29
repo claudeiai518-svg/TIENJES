@@ -19,12 +19,8 @@
     background-image:repeating-linear-gradient(var(--paper) 0 27px, var(--line) 27px 28px);
     min-height:100vh;
   }
-  header{
-    padding:22px 18px 10px; display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:6px;
-  }
-  header h1{
-    font-family:'Kalam',cursive; font-size:2.1rem; margin:0; color:var(--red); transform:rotate(-1deg);
-  }
+  header{ padding:22px 18px 10px; display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:6px; }
+  header h1{ font-family:'Kalam',cursive; font-size:2.1rem; margin:0; color:var(--red); transform:rotate(-1deg); }
   header .fecha{ color:var(--inkfaint); font-size:.85rem;}
   nav{ display:flex; gap:8px; padding:0 18px 14px; flex-wrap:wrap;}
   nav button{
@@ -32,7 +28,7 @@
     padding:6px 16px; border-radius:10px 10px 2px 2px; cursor:pointer; color:var(--ink);
   }
   nav button.active{ background:var(--ink); color:var(--paper); }
-  main{ padding:0 18px 60px; max-width:720px; margin:0 auto;}
+  main{ padding:0 18px 70px; max-width:860px; margin:0 auto;}
   .view{ display:none; } .view.active{ display:block; }
   .card{
     background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px;
@@ -44,29 +40,75 @@
   .muted{ color:var(--inkfaint); font-size:.82rem;}
   .amt{ font-weight:700; font-variant-numeric:tabular-nums;}
   .amt.red{ color:var(--red);} .amt.green{ color:var(--green);}
-  .low{ color:var(--red); }
+  .low{ color:var(--red); font-weight:600; }
   select,input,button.action{
     font-family:'Inter',sans-serif; font-size:1rem; padding:9px 10px; border:1.5px solid var(--ink);
-    border-radius:7px; background:#fff; width:100%;
+    border-radius:7px; background:#fff; width:100%; color:var(--ink);
   }
+  input:focus,select:focus{ outline:2px solid var(--amber); outline-offset:1px; }
   form{ display:grid; gap:8px; margin-top:6px; }
   form.inline{ grid-template-columns:1fr auto; align-items:end; }
-  button.action{
-    background:var(--ink); color:var(--paper); font-weight:600; cursor:pointer; border:none; width:auto; padding:9px 16px;
-  }
+  button.action{ background:var(--ink); color:var(--paper); font-weight:600; cursor:pointer; border:none; width:auto; padding:9px 16px; }
   button.action.red{ background:var(--red);} button.action.green{ background:var(--green);}
-  .fab{ display:flex; gap:8px; margin-bottom:14px; }
+  button.action.ghost{ background:transparent; color:var(--ink); border:1.5px solid var(--ink); }
+  .fab{ display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
   .summary{ display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;}
-  .summary .box{ flex:1; min-width:120px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 14px; text-align:center;}
-  .summary .box b{ display:block; font-size:1.3rem; font-family:'Kalam',cursive;}
+  .summary .box{ flex:1; min-width:110px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 14px; text-align:center;}
+  .summary .box b{ display:block; font-size:1.25rem; font-family:'Kalam',cursive;}
   details{ margin-top:4px; }
   details summary{ cursor:pointer; color:var(--inkfaint); font-size:.85rem; margin-bottom:6px;}
   .toast{
     position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:var(--ink); color:var(--paper);
-    padding:9px 18px; border-radius:20px; font-size:.9rem; opacity:0; transition:opacity .25s; pointer-events:none;
+    padding:9px 18px; border-radius:20px; font-size:.9rem; opacity:0; transition:opacity .25s; pointer-events:none; z-index:60; max-width:92vw;
   }
   .toast.show{ opacity:1; }
   .empty{ text-align:center; color:var(--inkfaint); padding:20px 0; font-family:'Kalam',cursive; font-size:1.1rem;}
+
+  /* botones pequeños */
+  .ib{
+    border:1.5px solid var(--ink); background:#fff; color:var(--ink); border-radius:7px; cursor:pointer;
+    font-size:.95rem; line-height:1; padding:7px 10px; font-family:inherit; min-width:36px;
+  }
+  .ib:hover{ background:var(--paper2); }
+  .ib.del{ border-color:var(--red); color:var(--red); }
+  .ib.del:hover{ background:var(--red); color:#fff; }
+  .ib.ok{ border-color:var(--green); color:var(--green); }
+  .acts{ display:flex; gap:6px; flex-shrink:0; }
+
+  /* inventario editable */
+  .prow{ padding:12px 0; border-bottom:1px dashed var(--line); }
+  .prow:last-child{ border-bottom:none; }
+  .prow .top{ display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+  .prow .top input{ font-weight:600; }
+  .pgrid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; align-items:end; }
+  .pgrid label{ display:block; font-size:.72rem; color:var(--inkfaint); margin-bottom:3px; }
+  .pgrid input{ padding:7px 8px; font-size:.95rem; }
+  .stk{ display:flex; gap:4px; align-items:center; }
+  .stk input{ text-align:center; min-width:0; }
+  .stk .ib{ min-width:32px; padding:7px 0; }
+  .marg{ font-size:.85rem; text-align:right; padding-bottom:8px; }
+  .marg b{ display:block; font-size:1rem; }
+  .marg.neg b{ color:var(--red); } .marg.pos b{ color:var(--green); }
+  .prow .foot{ display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  @media(max-width:560px){ .pgrid{ grid-template-columns:repeat(2,1fr); } .marg{ text-align:left; } }
+
+  .flt{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .flt input,.flt select{ flex:1; min-width:140px; }
+
+  /* movimientos de clientes */
+  .mov{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:6px 0; border-bottom:1px dashed var(--line); font-size:.92rem; }
+  .mov:last-child{ border-bottom:none; }
+  .tag{ display:inline-block; font-size:.7rem; padding:1px 7px; border-radius:10px; color:#fff; margin-right:6px; }
+  .tag.f{ background:var(--red);} .tag.a{ background:var(--green);}
+
+  /* modal */
+  .ov{ position:fixed; inset:0; background:rgba(43,38,32,.55); display:none; align-items:center; justify-content:center; z-index:50; padding:16px; }
+  .ov.show{ display:flex; }
+  .modal{ background:var(--card); border:2px solid var(--ink); border-radius:12px; padding:18px; width:100%; max-width:400px; box-shadow:4px 5px 0 var(--line); max-height:90vh; overflow:auto; }
+  .modal h3{ margin:0 0 10px; font-family:'Kalam',cursive; font-size:1.3rem; }
+  .modal label{ display:block; font-size:.8rem; color:var(--inkfaint); margin:8px 0 3px; }
+  .modal .btns{ display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
+  .modal .btns .sp{ flex:1; }
 </style>
 </head>
 <body>
@@ -87,28 +129,46 @@
   <!-- VENTAS -->
   <section class="view active" id="v-ventas">
     <div class="summary">
-      <div class="box"><span class="muted">Vendido hoy</span><b id="totHoy">$0</b></div>
-      <div class="box"><span class="muted">Ganancia hoy</span><b id="ganHoy">$0</b></div>
+      <div class="box"><span class="muted" id="lblVendido">Vendido hoy</span><b id="totHoy">$0</b></div>
+      <div class="box"><span class="muted" id="lblGanancia">Ganancia hoy</span><b id="ganHoy">$0</b></div>
     </div>
     <div class="card">
       <h3>Registrar venta</h3>
       <form id="fVenta">
         <select id="ventaProd" required></select>
         <div style="display:flex; gap:8px;">
-          <input type="number" id="ventaCant" min="1" value="1" required style="width:90px;">
-          <button class="action green" type="submit" style="flex:1;">Vender</button>
+          <input type="number" id="ventaCant" min="1" value="1" required style="width:90px;" title="Cantidad">
+          <input type="number" id="ventaPrecio" min="0" placeholder="Precio unidad" required title="Precio por unidad (editable)">
+          <button class="action green" type="submit">Vender</button>
         </div>
+        <span class="muted">Puedes cambiar el precio de esta venta sin tocar el del producto.</span>
       </form>
     </div>
     <div class="card">
-      <h3>Ventas de hoy</h3>
+      <h3>Ventas</h3>
+      <div class="flt">
+        <select id="ventaPeriodo">
+          <option value="hoy">Hoy</option>
+          <option value="7">Últimos 7 días</option>
+          <option value="mes">Este mes</option>
+          <option value="todo">Todas</option>
+        </select>
+      </div>
       <div id="listaVentas"></div>
     </div>
   </section>
 
   <!-- INVENTARIO -->
   <section class="view" id="v-inventario">
-    <div class="fab"><button class="action" onclick="toggleForm('fProducto')">+ Nuevo producto</button></div>
+    <div class="summary">
+      <div class="box"><span class="muted">Invertido en stock</span><b id="stInv">$0</b></div>
+      <div class="box"><span class="muted">Valor a precio venta</span><b id="stVal">$0</b></div>
+      <div class="box"><span class="muted">Ganancia posible</span><b class="amt green" id="stGan">$0</b></div>
+    </div>
+    <div class="fab">
+      <button class="action" onclick="toggleForm('fProducto')">+ Nuevo producto</button>
+      <button class="action ghost" onclick="toggleForm('fMargen')">Cuadrar precios</button>
+    </div>
     <div class="card" id="fProductoWrap" style="display:none;">
       <h3>Nuevo producto</h3>
       <form id="fProducto">
@@ -121,8 +181,25 @@
         <button class="action" type="submit">Guardar</button>
       </form>
     </div>
+    <div class="card" id="fMargenWrap" style="display:none;">
+      <h3>Cuadrar precios</h3>
+      <p class="muted" style="margin:0 0 8px;">Pone el precio de venta = costo + margen %, para todos los productos que tengan costo.</p>
+      <form id="fMargen">
+        <div style="display:flex; gap:8px;">
+          <input type="number" id="mPct" placeholder="Margen % (ej. 30)" min="0" required>
+          <select id="mRedondeo">
+            <option value="50">Redondear a $50</option>
+            <option value="100">Redondear a $100</option>
+            <option value="500">Redondear a $500</option>
+            <option value="1">Sin redondear</option>
+          </select>
+        </div>
+        <button class="action" type="submit">Aplicar a todos</button>
+      </form>
+    </div>
     <div class="card">
       <h3>Disponibles</h3>
+      <div class="flt"><input type="search" id="buscaProd" placeholder="Buscar producto…"></div>
       <div id="listaProductos"></div>
     </div>
   </section>
@@ -144,6 +221,8 @@
   </section>
 
 </main>
+
+<div class="ov" id="ov"><div class="modal" id="modal"></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -151,23 +230,50 @@ const SB_URL = 'https://fqvetpjqprphujorjjzf.supabase.co/rest/v1/';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxdmV0cGpxcHJwaHVqb3JqanpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2OTc3MTcsImV4cCI6MjEwNjI3MzcxN30.-2yL6LfxNTQTnrBydOND6JjxHWVfgwiUDM2kK6W0QLU';
 
 async function sb(path, opts={}){
-  const res = await fetch(SB_URL+path, {
-    ...opts,
-    headers:{
-      'apikey':SB_KEY, 'Authorization':'Bearer '+SB_KEY, 'Content-Type':'application/json',
-      'Prefer': opts.method && opts.method!=='GET' ? 'return=representation' : undefined,
-      ...(opts.headers||{})
-    }
-  });
-  if(!res.ok){ toast('Error: '+(await res.text()).slice(0,80)); throw new Error('sb error'); }
+  const headers = { 'apikey':SB_KEY, 'Authorization':'Bearer '+SB_KEY, 'Content-Type':'application/json' };
+  if(opts.method && opts.method!=='GET') headers['Prefer']='return=representation';
+  const res = await fetch(SB_URL+path, { ...opts, headers:{...headers, ...(opts.headers||{})} });
+  if(!res.ok){
+    let msg = await res.text();
+    try{ const j=JSON.parse(msg); msg=j.message||msg; }catch(_){}
+    if(/duplicate key|unique/i.test(msg)) msg='Ya existe uno con ese nombre';
+    toast('Error: '+msg.slice(0,90)); throw new Error('sb error');
+  }
   return res.status===204 ? null : res.json();
 }
 function toast(msg){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2200);
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2400);
 }
-function money(n){ return '$'+Math.round(n).toLocaleString('es-CO'); }
+function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function money(n){ return '$'+Math.round(Number(n)||0).toLocaleString('es-CO'); }
 function toggleForm(id){ const w=document.getElementById(id+'Wrap'); w.style.display = w.style.display==='none'?'block':'none'; }
+function fechaCorta(f){ if(!f) return ''; const [y,m,d]=f.split('-'); return `${d}/${m}`; }
+
+// ---------- Modal genérico ----------
+// fields: [{k,label,type,value,min}] · onSave(values) · onDelete() opcional
+function openModal({title, fields=[], saveText='Guardar', onSave, onDelete, deleteText='Eliminar', note}){
+  const m = document.getElementById('modal');
+  m.innerHTML = `<h3>${esc(title)}</h3>` + (note?`<p class="muted" style="margin:0 0 6px;">${esc(note)}</p>`:'') +
+    fields.map(f=>`<label for="mf_${f.k}">${esc(f.label)}</label>
+      <input id="mf_${f.k}" type="${f.type||'text'}" value="${esc(f.value??'')}" ${f.min!=null?`min="${f.min}"`:''} ${f.step?`step="${f.step}"`:''}>`).join('') +
+    `<div class="btns">
+      ${onDelete?`<button class="action red" id="mDel" type="button">${esc(deleteText)}</button>`:''}
+      <span class="sp"></span>
+      <button class="action ghost" id="mCancel" type="button">Cancelar</button>
+      ${onSave?`<button class="action" id="mSave" type="button">${esc(saveText)}</button>`:''}
+    </div>`;
+  const ov = document.getElementById('ov'); ov.classList.add('show');
+  const first = m.querySelector('input'); if(first){ first.focus(); first.select?.(); }
+  const close = ()=>ov.classList.remove('show');
+  m.querySelector('#mCancel').onclick = close;
+  const get = ()=>Object.fromEntries(fields.map(f=>[f.k, document.getElementById('mf_'+f.k).value]));
+  const save = async()=>{ if(await onSave(get())!==false) close(); };
+  if(onSave) m.querySelector('#mSave').onclick = save;
+  if(onDelete) m.querySelector('#mDel').onclick = async()=>{ if(await onDelete()!==false) close(); };
+  m.onkeydown = e=>{ if(e.key==='Enter' && onSave && e.target.tagName==='INPUT'){ e.preventDefault(); save(); } if(e.key==='Escape') close(); };
+}
+document.getElementById('ov').addEventListener('mousedown',e=>{ if(e.target.id==='ov') e.target.classList.remove('show'); });
 
 // ---------- Nav ----------
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
@@ -179,58 +285,132 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
 const hoy = new Date().toLocaleDateString('sv-SE'); // YYYY-MM-DD
 document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'});
 
-// ---------- Ventas ----------
+// =====================================================
+//  PRODUCTOS / STOCK
+// =====================================================
 let productosCache = [];
 async function loadProductos(){
   productosCache = await sb('productos?select=*&order=nombre.asc');
-  const sel = document.getElementById('ventaProd');
-  sel.innerHTML = productosCache.map(p=>`<option value="${p.id}" ${p.cantidad<=0?'disabled':''}>${p.nombre} — ${money(p.precio_venta)} (stock ${p.cantidad})</option>`).join('');
+  renderSelectVenta();
   renderInventario();
 }
+function renderSelectVenta(){
+  const sel = document.getElementById('ventaProd');
+  const prev = sel.value;
+  sel.innerHTML = productosCache.map(p=>`<option value="${p.id}" ${p.cantidad<=0?'disabled':''}>${esc(p.nombre)} — ${money(p.precio_venta)} (stock ${p.cantidad})</option>`).join('');
+  if(prev && productosCache.some(p=>p.id==prev && p.cantidad>0)) sel.value = prev;
+  syncPrecioVenta();
+}
+function syncPrecioVenta(){
+  const p = productosCache.find(x=>x.id==document.getElementById('ventaProd').value);
+  document.getElementById('ventaPrecio').value = p ? p.precio_venta : '';
+}
+document.getElementById('ventaProd').onchange = syncPrecioVenta;
+
+function margenHTML(p){
+  const g = Number(p.precio_venta)-Number(p.costo);
+  const pct = Number(p.costo)>0 ? Math.round(g/Number(p.costo)*100)+'% sobre costo' : 'sin costo';
+  return `<b>${g>=0?'+':''}${money(g)}</b>${pct}`;
+}
+function renderTotalesStock(){
+  const inv = productosCache.reduce((s,p)=>s+p.cantidad*Number(p.costo),0);
+  const val = productosCache.reduce((s,p)=>s+p.cantidad*Number(p.precio_venta),0);
+  document.getElementById('stInv').textContent = money(inv);
+  document.getElementById('stVal').textContent = money(val);
+  document.getElementById('stGan').textContent = money(val-inv);
+}
 function renderInventario(){
+  renderTotalesStock();
+  const q = document.getElementById('buscaProd').value.trim().toLowerCase();
+  const lista = productosCache.filter(p=>!q || p.nombre.toLowerCase().includes(q));
   const el = document.getElementById('listaProductos');
-  if(!productosCache.length){ el.innerHTML='<div class="empty">Sin productos</div>'; return; }
-  el.innerHTML = productosCache.map(p=>`
-    <div class="row">
-      <div><b>${p.nombre}</b><br><span class="muted">costo ${money(p.costo)} · gana ${money(p.ganancia)}</span></div>
-      <div style="text-align:right;">
-        <div class="amt">${money(p.precio_venta)}</div>
-        <div class="muted ${p.cantidad<=2?'low':''}">stock: ${p.cantidad}</div>
+  if(!lista.length){ el.innerHTML='<div class="empty">'+(productosCache.length?'Sin resultados':'Sin productos')+'</div>'; return; }
+  el.innerHTML = lista.map(p=>`
+    <div class="prow" data-id="${p.id}">
+      <div class="top">
+        <input type="text" data-f="nombre" value="${esc(p.nombre)}" aria-label="Nombre">
+        <button class="ib del" data-a="del" title="Eliminar producto">🗑</button>
       </div>
+      <div class="pgrid">
+        <div><label>Stock ${p.cantidad<=2?'<span class="low">(poco)</span>':''}</label>
+          <div class="stk">
+            <button class="ib" data-a="minus" title="Restar 1">−</button>
+            <input type="number" min="0" data-f="cantidad" value="${p.cantidad}">
+            <button class="ib" data-a="plus" title="Sumar 1">+</button>
+          </div></div>
+        <div><label>Costo</label><input type="number" min="0" data-f="costo" value="${Number(p.costo)}"></div>
+        <div><label>Precio venta</label><input type="number" min="0" data-f="precio_venta" value="${Number(p.precio_venta)}"></div>
+        <div class="marg ${Number(p.precio_venta)-Number(p.costo)<0?'neg':'pos'}">${margenHTML(p)}</div>
+      </div>
+      <div class="foot"><button class="ib ok" data-a="ingreso">📦 Ingresar mercancía</button></div>
     </div>`).join('');
 }
-async function loadVentasHoy(){
-  const ventas = await sb(`ventas?select=*&fecha=eq.${hoy}&order=created_at.desc`);
-  const el = document.getElementById('listaVentas');
-  if(!ventas.length){ el.innerHTML='<div class="empty">Aún no hay ventas hoy</div>'; }
-  else{
-    el.innerHTML = ventas.map(v=>`
-      <div class="row"><div>${v.producto} <span class="muted">x${v.cantidad}</span></div><div class="amt">${money(v.total)}</div></div>`).join('');
-  }
-  document.getElementById('totHoy').textContent = money(ventas.reduce((s,v)=>s+Number(v.total),0));
-  document.getElementById('ganHoy').textContent = money(ventas.reduce((s,v)=>s+Number(v.ganancia),0));
+document.getElementById('buscaProd').oninput = renderInventario;
+
+async function patchProducto(id, data){
+  const r = await sb(`productos?id=eq.${id}`, {method:'PATCH', body:JSON.stringify(data)});
+  const i = productosCache.findIndex(x=>x.id==id);
+  if(i>=0 && r && r[0]) productosCache[i] = r[0];
+  return r && r[0];
+}
+function refreshRow(id){
+  const p = productosCache.find(x=>x.id==id); const row = document.querySelector(`.prow[data-id="${id}"]`);
+  if(!p || !row) return;
+  const m = row.querySelector('.marg'); m.innerHTML = margenHTML(p);
+  m.className = 'marg '+(Number(p.precio_venta)-Number(p.costo)<0?'neg':'pos');
+  row.querySelector('[data-f="cantidad"]').value = p.cantidad;
+  row.querySelector('[data-f="costo"]').value = Number(p.costo);
+  row.querySelector('[data-f="precio_venta"]').value = Number(p.precio_venta);
+  renderSelectVenta(); renderTotalesStock();
 }
 
-document.getElementById('fVenta').onsubmit = async (e)=>{
-  e.preventDefault();
-  const id = document.getElementById('ventaProd').value;
-  const cant = Number(document.getElementById('ventaCant').value);
-  const p = productosCache.find(x=>x.id==id);
-  if(!p) return;
-  if(cant > p.cantidad){ toast('No hay suficiente stock'); return; }
-  await sb('ventas', {method:'POST', body:JSON.stringify({
-    producto_id:p.id, producto:p.nombre, cantidad:cant, precio_unit:p.precio_venta, costo_unit:p.costo
-  })});
-  await sb(`productos?id=eq.${p.id}`, {method:'PATCH', body:JSON.stringify({cantidad:p.cantidad-cant})});
-  document.getElementById('ventaCant').value = 1;
-  toast('Venta registrada');
-  await loadProductos(); await loadVentasHoy();
-};
+// editar campos en la fila (al salir del campo)
+document.getElementById('listaProductos').addEventListener('change', async e=>{
+  const inp = e.target.closest('input[data-f]'); if(!inp) return;
+  const id = inp.closest('.prow').dataset.id; const f = inp.dataset.f;
+  const p = productosCache.find(x=>x.id==id); if(!p) return;
+  let v = inp.value;
+  if(f==='nombre'){ v=v.trim(); if(!v){ inp.value=p.nombre; return; } }
+  else { v=Number(v); if(!isFinite(v)||v<0){ inp.value=p[f]; toast('Valor no válido'); return; } if(f==='cantidad') v=Math.round(v); }
+  if(v===p[f] || v===Number(p[f])) return;
+  try{ await patchProducto(id,{[f]:v}); refreshRow(id); toast('Guardado'); }
+  catch(_){ inp.value=p[f]; }
+});
+document.getElementById('listaProductos').addEventListener('keydown', e=>{
+  if(e.key==='Enter' && e.target.matches('input[data-f]')) e.target.blur();
+});
+// botones de la fila
+document.getElementById('listaProductos').addEventListener('click', async e=>{
+  const b = e.target.closest('button[data-a]'); if(!b) return;
+  const id = b.closest('.prow').dataset.id; const p = productosCache.find(x=>x.id==id); if(!p) return;
+  const a = b.dataset.a;
+  if(a==='plus' || a==='minus'){
+    const n = p.cantidad + (a==='plus'?1:-1); if(n<0) return;
+    try{ await patchProducto(id,{cantidad:n}); refreshRow(id); }catch(_){}
+  }
+  if(a==='ingreso'){
+    openModal({ title:'Ingresar mercancía: '+p.nombre, note:`Ahora hay ${p.cantidad}. Se suma lo que ingreses.`,
+      fields:[
+        {k:'cant',label:'Cantidad que llegó',type:'number',value:'',min:1},
+        {k:'costo',label:'Costo por unidad (déjalo igual si no cambió)',type:'number',value:Number(p.costo),min:0},
+        {k:'precio',label:'Precio de venta',type:'number',value:Number(p.precio_venta),min:0}],
+      saveText:'Ingresar',
+      onSave: async v=>{
+        const c=Math.round(Number(v.cant)); if(!(c>0)){ toast('Pon la cantidad'); return false; }
+        await patchProducto(id,{cantidad:p.cantidad+c, costo:Number(v.costo)||0, precio_venta:Number(v.precio)||0});
+        refreshRow(id); toast(`+${c} ${p.nombre}`);
+      }});
+  }
+  if(a==='del'){
+    openModal({ title:'Eliminar producto', note:`Se borra "${p.nombre}" del stock. Las ventas ya hechas se conservan.`,
+      onDelete: async()=>{ await sb(`productos?id=eq.${id}`,{method:'DELETE'}); toast('Producto eliminado'); await loadProductos(); await loadVentas(); }});
+  }
+});
 
 document.getElementById('fProducto').onsubmit = async (e)=>{
   e.preventDefault();
   await sb('productos', {method:'POST', body:JSON.stringify({
-    nombre:document.getElementById('pNombre').value,
+    nombre:document.getElementById('pNombre').value.trim(),
     cantidad:Number(document.getElementById('pCantidad').value),
     costo:Number(document.getElementById('pCosto').value),
     precio_venta:Number(document.getElementById('pPrecio').value)
@@ -238,57 +418,236 @@ document.getElementById('fProducto').onsubmit = async (e)=>{
   e.target.reset(); toggleForm('fProducto'); toast('Producto agregado'); await loadProductos();
 };
 
-// ---------- Fiados ----------
+// cuadrar precios por margen
+document.getElementById('fMargen').onsubmit = async (e)=>{
+  e.preventDefault();
+  const pct = Number(document.getElementById('mPct').value);
+  const red = Number(document.getElementById('mRedondeo').value)||1;
+  const objetivo = productosCache.filter(p=>Number(p.costo)>0);
+  if(!objetivo.length){ toast('Ningún producto tiene costo'); return; }
+  openModal({ title:'Cuadrar precios', note:`Se cambiará el precio de ${objetivo.length} productos a costo + ${pct}%. Puedes ajustar cada uno después.`,
+    saveText:'Aplicar',
+    onSave: async()=>{
+      await Promise.all(objetivo.map(p=>{
+        let nuevo = Number(p.costo)*(1+pct/100);
+        nuevo = Math.ceil(nuevo/red)*red;
+        return sb(`productos?id=eq.${p.id}`,{method:'PATCH',body:JSON.stringify({precio_venta:nuevo})});
+      }));
+      toast('Precios actualizados'); toggleForm('fMargen'); e.target.reset(); await loadProductos();
+    }});
+};
+
+// =====================================================
+//  VENTAS
+// =====================================================
+let ventasCache = [];
+function desdePeriodo(){
+  const p = document.getElementById('ventaPeriodo').value;
+  const d = new Date();
+  if(p==='hoy') return hoy;
+  if(p==='7'){ d.setDate(d.getDate()-6); return d.toLocaleDateString('sv-SE'); }
+  if(p==='mes'){ return hoy.slice(0,8)+'01'; }
+  return null;
+}
+async function loadVentas(){
+  const desde = desdePeriodo();
+  ventasCache = await sb(`ventas?select=*${desde?`&fecha=gte.${desde}`:''}&order=created_at.desc`);
+  const per = document.getElementById('ventaPeriodo').value;
+  const nom = {hoy:'hoy','7':'7 días',mes:'este mes',todo:'total'}[per];
+  document.getElementById('lblVendido').textContent = 'Vendido '+nom;
+  document.getElementById('lblGanancia').textContent = 'Ganancia '+nom;
+  const el = document.getElementById('listaVentas');
+  if(!ventasCache.length){ el.innerHTML='<div class="empty">No hay ventas en este periodo</div>'; }
+  else{
+    el.innerHTML = ventasCache.map(v=>`
+      <div class="row" data-id="${v.id}">
+        <div>${esc(v.producto)} <span class="muted">x${v.cantidad} · ${money(v.precio_unit)} c/u${per!=='hoy'?' · '+fechaCorta(v.fecha):''}</span></div>
+        <div class="acts">
+          <span class="amt" style="align-self:center;">${money(v.total)}</span>
+          <button class="ib" data-a="edit" title="Editar">✎</button>
+          <button class="ib del" data-a="del" title="Eliminar">🗑</button>
+        </div>
+      </div>`).join('');
+  }
+  document.getElementById('totHoy').textContent = money(ventasCache.reduce((s,v)=>s+Number(v.total),0));
+  document.getElementById('ganHoy').textContent = money(ventasCache.reduce((s,v)=>s+Number(v.ganancia),0));
+}
+document.getElementById('ventaPeriodo').onchange = loadVentas;
+
+document.getElementById('fVenta').onsubmit = async (e)=>{
+  e.preventDefault();
+  const id = document.getElementById('ventaProd').value;
+  const cant = Math.round(Number(document.getElementById('ventaCant').value));
+  const precio = Number(document.getElementById('ventaPrecio').value);
+  const p = productosCache.find(x=>x.id==id);
+  if(!p) return;
+  if(cant > p.cantidad){ toast('No hay suficiente stock'); return; }
+  await sb('ventas', {method:'POST', body:JSON.stringify({
+    producto_id:p.id, producto:p.nombre, cantidad:cant, precio_unit:precio, costo_unit:p.costo
+  })});
+  await sb(`productos?id=eq.${p.id}`, {method:'PATCH', body:JSON.stringify({cantidad:p.cantidad-cant})});
+  document.getElementById('ventaCant').value = 1;
+  toast('Venta registrada');
+  await loadProductos(); await loadVentas();
+};
+
+document.getElementById('listaVentas').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-a]'); if(!b) return;
+  const id = b.closest('.row').dataset.id; const v = ventasCache.find(x=>x.id==id); if(!v) return;
+  const prod = v.producto_id ? productosCache.find(x=>x.id==v.producto_id) : null;
+  if(b.dataset.a==='edit'){
+    openModal({ title:'Editar venta', note: prod?'Si cambias la cantidad, el stock se ajusta solo.':'Este producto ya no existe en stock, no se ajustará inventario.',
+      fields:[
+        {k:'producto',label:'Producto',value:v.producto},
+        {k:'cantidad',label:'Cantidad',type:'number',value:v.cantidad,min:1},
+        {k:'precio_unit',label:'Precio por unidad',type:'number',value:Number(v.precio_unit),min:0},
+        {k:'costo_unit',label:'Costo por unidad',type:'number',value:Number(v.costo_unit),min:0},
+        {k:'fecha',label:'Fecha',type:'date',value:v.fecha}],
+      onSave: async f=>{
+        const cant = Math.round(Number(f.cantidad));
+        if(!(cant>0)){ toast('Cantidad no válida'); return false; }
+        const delta = cant - v.cantidad; // >0 saca más stock
+        if(prod && prod.cantidad - delta < 0){ toast('No hay suficiente stock para ese cambio'); return false; }
+        await sb(`ventas?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({
+          producto:f.producto.trim()||v.producto, cantidad:cant, precio_unit:Number(f.precio_unit)||0,
+          costo_unit:Number(f.costo_unit)||0, fecha:f.fecha||v.fecha })});
+        if(prod && delta!==0) await sb(`productos?id=eq.${prod.id}`,{method:'PATCH',body:JSON.stringify({cantidad:prod.cantidad-delta})});
+        toast('Venta actualizada'); await loadProductos(); await loadVentas();
+      }});
+  }
+  if(b.dataset.a==='del'){
+    openModal({ title:'Eliminar venta', note:`${v.producto} x${v.cantidad} (${money(v.total)})`+(prod?`. Las ${v.cantidad} unidades vuelven al stock.`:'.'),
+      onDelete: async()=>{
+        await sb(`ventas?id=eq.${id}`,{method:'DELETE'});
+        if(prod) await sb(`productos?id=eq.${prod.id}`,{method:'PATCH',body:JSON.stringify({cantidad:prod.cantidad+v.cantidad})});
+        toast('Venta eliminada'); await loadProductos(); await loadVentas();
+      }});
+  }
+});
+
+// =====================================================
+//  FIADOS
+// =====================================================
+let clientesCache = [];
+const abiertos = new Set();
 async function loadClientes(){
-  const clientes = await sb('clientes?select=*,fiados(monto),abonos(monto)&order=nombre.asc');
+  clientesCache = await sb('clientes?select=*,fiados(id,monto,concepto,fecha,created_at),abonos(id,monto,fecha,created_at)&order=nombre.asc');
+  renderClientes();
+}
+function renderClientes(){
   let totalGeneral = 0;
   const el = document.getElementById('listaClientes');
-  if(!clientes.length){ el.innerHTML='<div class="empty">Sin clientes</div>'; }
+  if(!clientesCache.length){ el.innerHTML='<div class="empty">Sin clientes</div>'; }
   else{
-    el.innerHTML = clientes.map(c=>{
+    el.innerHTML = clientesCache.map(c=>{
       const debe = c.fiados.reduce((s,f)=>s+Number(f.monto),0);
       const pago = c.abonos.reduce((s,a)=>s+Number(a.monto),0);
       const saldo = debe - pago; totalGeneral += saldo;
+      const movs = [
+        ...c.fiados.map(f=>({...f,t:'f'})),
+        ...c.abonos.map(a=>({...a,t:'a'}))
+      ].sort((a,b)=> (b.created_at||'').localeCompare(a.created_at||''));
       return `
-      <div class="card">
+      <div class="card" data-cid="${c.id}">
         <div class="row" style="border:none; padding-bottom:4px;">
-          <b>${c.nombre}</b>
-          <span class="amt ${saldo>0?'red':'green'}">${money(saldo)}</span>
+          <b>${esc(c.nombre)}</b>
+          <div class="acts">
+            <span class="amt ${saldo>0?'red':'green'}" style="align-self:center;">${money(saldo)}</span>
+            <button class="ib" data-a="rename" title="Cambiar nombre">✎</button>
+            <button class="ib del" data-a="delcli" title="Eliminar cliente">🗑</button>
+          </div>
         </div>
-        <form class="inline" onsubmit="return addFiado(event, ${c.id})">
+        <form class="inline" data-form="fiado">
           <input type="number" min="1" placeholder="Nuevo fiado $" required>
           <button class="action red" type="submit">Fiar</button>
         </form>
-        <form class="inline" style="margin-top:6px;" onsubmit="return addAbono(event, ${c.id})">
+        <form class="inline" data-form="abono" style="margin-top:6px;">
           <input type="number" min="1" placeholder="Abono $" required>
           <button class="action green" type="submit">Abonar</button>
         </form>
+        <details data-cid="${c.id}" ${abiertos.has(String(c.id))?'open':''}>
+          <summary>Movimientos (${movs.length})</summary>
+          ${movs.length? movs.map(m=>`
+            <div class="mov" data-mid="${m.id}" data-t="${m.t}">
+              <div><span class="tag ${m.t}">${m.t==='f'?'Fiado':'Abono'}</span>${fechaCorta(m.fecha)}${m.t==='f'&&m.concepto&&m.concepto!=='Fiado'?' · '+esc(m.concepto):''}</div>
+              <div class="acts">
+                <span class="amt ${m.t==='f'?'red':'green'}" style="align-self:center;">${m.t==='f'?'+':'−'}${money(m.monto)}</span>
+                <button class="ib" data-a="editmov" title="Editar">✎</button>
+                <button class="ib del" data-a="delmov" title="Eliminar">🗑</button>
+              </div>
+            </div>`).join('') : '<div class="muted">Sin movimientos</div>'}
+        </details>
       </div>`;
     }).join('');
   }
   document.getElementById('totFiado').textContent = money(totalGeneral);
 }
-async function addFiado(e, clienteId){
+const lc = document.getElementById('listaClientes');
+lc.addEventListener('toggle', e=>{
+  const d=e.target; if(d.tagName!=='DETAILS') return;
+  d.open ? abiertos.add(d.dataset.cid) : abiertos.delete(d.dataset.cid);
+}, true);
+
+lc.addEventListener('submit', async e=>{
+  const f = e.target.closest('form[data-form]'); if(!f) return;
   e.preventDefault();
-  const monto = Number(e.target.querySelector('input').value);
-  await sb('fiados', {method:'POST', body:JSON.stringify({cliente_id:clienteId, monto, concepto:'Fiado'})});
-  toast('Fiado registrado'); await loadClientes(); return false;
-}
-async function addAbono(e, clienteId){
-  e.preventDefault();
-  const monto = Number(e.target.querySelector('input').value);
-  await sb('abonos', {method:'POST', body:JSON.stringify({cliente_id:clienteId, monto})});
-  toast('Abono registrado'); await loadClientes(); return false;
-}
+  const cid = Number(f.closest('.card').dataset.cid);
+  const monto = Number(f.querySelector('input').value);
+  if(f.dataset.form==='fiado'){
+    await sb('fiados', {method:'POST', body:JSON.stringify({cliente_id:cid, monto, concepto:'Fiado'})});
+    toast('Fiado registrado');
+  } else {
+    await sb('abonos', {method:'POST', body:JSON.stringify({cliente_id:cid, monto})});
+    toast('Abono registrado');
+  }
+  abiertos.add(String(cid)); await loadClientes();
+});
+
+lc.addEventListener('click', e=>{
+  const b = e.target.closest('button[data-a]'); if(!b) return;
+  const cid = Number(b.closest('.card').dataset.cid);
+  const c = clientesCache.find(x=>x.id===cid); if(!c) return;
+  const a = b.dataset.a;
+  if(a==='rename'){
+    openModal({ title:'Cambiar nombre', fields:[{k:'nombre',label:'Nombre',value:c.nombre}],
+      onSave: async v=>{ const n=v.nombre.trim(); if(!n) return false;
+        await sb(`clientes?id=eq.${cid}`,{method:'PATCH',body:JSON.stringify({nombre:n})}); toast('Nombre actualizado'); await loadClientes(); }});
+  }
+  if(a==='delcli'){
+    openModal({ title:'Eliminar cliente', note:`Se borra "${c.nombre}" con todos sus fiados y abonos. No se puede deshacer.`,
+      onDelete: async()=>{ await sb(`clientes?id=eq.${cid}`,{method:'DELETE'}); toast('Cliente eliminado'); await loadClientes(); }});
+  }
+  if(a==='editmov' || a==='delmov'){
+    const mv = b.closest('.mov'); const mid = Number(mv.dataset.mid); const t = mv.dataset.t;
+    const tabla = t==='f'?'fiados':'abonos';
+    const m = (t==='f'?c.fiados:c.abonos).find(x=>x.id===mid); if(!m) return;
+    if(a==='editmov'){
+      const fields = [{k:'monto',label:'Monto',type:'number',value:Number(m.monto),min:1}];
+      if(t==='f') fields.push({k:'concepto',label:'Concepto',value:m.concepto||''});
+      fields.push({k:'fecha',label:'Fecha',type:'date',value:m.fecha});
+      openModal({ title: t==='f'?'Editar fiado':'Editar abono', fields,
+        onSave: async v=>{
+          const monto=Number(v.monto); if(!(monto>0)){ toast('Monto no válido'); return false; }
+          const body={monto, fecha:v.fecha||m.fecha}; if(t==='f') body.concepto=v.concepto.trim()||'Fiado';
+          await sb(`${tabla}?id=eq.${mid}`,{method:'PATCH',body:JSON.stringify(body)});
+          toast('Actualizado'); await loadClientes();
+        }});
+    } else {
+      openModal({ title: t==='f'?'Eliminar fiado':'Eliminar abono', note:`${money(m.monto)} del ${fechaCorta(m.fecha)}`,
+        onDelete: async()=>{ await sb(`${tabla}?id=eq.${mid}`,{method:'DELETE'}); toast('Eliminado'); await loadClientes(); }});
+    }
+  }
+});
+
 document.getElementById('fCliente').onsubmit = async (e)=>{
   e.preventDefault();
-  await sb('clientes', {method:'POST', body:JSON.stringify({nombre:document.getElementById('cNombre').value})});
+  await sb('clientes', {method:'POST', body:JSON.stringify({nombre:document.getElementById('cNombre').value.trim()})});
   e.target.reset(); toggleForm('fCliente'); toast('Cliente agregado'); await loadClientes();
 };
 
 (async function init(){
   await loadProductos();
-  await loadVentasHoy();
+  await loadVentas();
   await loadClientes();
 })();
 </script>
