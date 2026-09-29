@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tienda Jesica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4EEDD; --paper2:#EFE7D1; --ink:#2B2620; --inkfaint:#8A8067;
+    --line:#D8CBAA; --red:#A73B34; --green:#4C7A52; --amber:#B4832B;
+    --card:#FBF8EF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Inter',sans-serif;
+    background-image:repeating-linear-gradient(var(--paper) 0 27px, var(--line) 27px 28px);
+    min-height:100vh;
+  }
+  header{
+    padding:22px 18px 10px; display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:6px;
+  }
+  header h1{
+    font-family:'Kalam',cursive; font-size:2.1rem; margin:0; color:var(--red); transform:rotate(-1deg);
+  }
+  header .fecha{ color:var(--inkfaint); font-size:.85rem;}
+  nav{ display:flex; gap:8px; padding:0 18px 14px; flex-wrap:wrap;}
+  nav button{
+    font-family:'Kalam',cursive; font-size:1.1rem; border:2px solid var(--ink); background:var(--paper2);
+    padding:6px 16px; border-radius:10px 10px 2px 2px; cursor:pointer; color:var(--ink);
+  }
+  nav button.active{ background:var(--ink); color:var(--paper); }
+  main{ padding:0 18px 60px; max-width:720px; margin:0 auto;}
+  .view{ display:none; } .view.active{ display:block; }
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+    margin-bottom:12px; box-shadow:2px 3px 0 var(--line);
+  }
+  .card h3{ margin:0 0 8px; font-family:'Kalam',cursive; font-size:1.25rem;}
+  .row{ display:flex; justify-content:space-between; align-items:center; gap:10px; padding:7px 0; border-bottom:1px dashed var(--line); }
+  .row:last-child{ border-bottom:none;}
+  .muted{ color:var(--inkfaint); font-size:.82rem;}
+  .amt{ font-weight:700; font-variant-numeric:tabular-nums;}
+  .amt.red{ color:var(--red);} .amt.green{ color:var(--green);}
+  .low{ color:var(--red); }
+  select,input,button.action{
+    font-family:'Inter',sans-serif; font-size:1rem; padding:9px 10px; border:1.5px solid var(--ink);
+    border-radius:7px; background:#fff; width:100%;
+  }
+  form{ display:grid; gap:8px; margin-top:6px; }
+  form.inline{ grid-template-columns:1fr auto; align-items:end; }
+  button.action{
+    background:var(--ink); color:var(--paper); font-weight:600; cursor:pointer; border:none; width:auto; padding:9px 16px;
+  }
+  button.action.red{ background:var(--red);} button.action.green{ background:var(--green);}
+  .fab{ display:flex; gap:8px; margin-bottom:14px; }
+  .summary{ display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;}
+  .summary .box{ flex:1; min-width:120px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 14px; text-align:center;}
+  .summary .box b{ display:block; font-size:1.3rem; font-family:'Kalam',cursive;}
+  details{ margin-top:4px; }
+  details summary{ cursor:pointer; color:var(--inkfaint); font-size:.85rem; margin-bottom:6px;}
+  .toast{
+    position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:var(--ink); color:var(--paper);
+    padding:9px 18px; border-radius:20px; font-size:.9rem; opacity:0; transition:opacity .25s; pointer-events:none;
+  }
+  .toast.show{ opacity:1; }
+  .empty{ text-align:center; color:var(--inkfaint); padding:20px 0; font-family:'Kalam',cursive; font-size:1.1rem;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Tienda Jesica 🍬</h1>
+  <span class="fecha" id="fechaHoy"></span>
+</header>
+
+<nav>
+  <button data-v="ventas" class="active">Ventas</button>
+  <button data-v="inventario">Stock</button>
+  <button data-v="fiados">Fiados</button>
+</nav>
+
+<main>
+
+  <!-- VENTAS -->
+  <section class="view active" id="v-ventas">
+    <div class="summary">
+      <div class="box"><span class="muted">Vendido hoy</span><b id="totHoy">$0</b></div>
+      <div class="box"><span class="muted">Ganancia hoy</span><b id="ganHoy">$0</b></div>
+    </div>
+    <div class="card">
+      <h3>Registrar venta</h3>
+      <form id="fVenta">
+        <select id="ventaProd" required></select>
+        <div style="display:flex; gap:8px;">
+          <input type="number" id="ventaCant" min="1" value="1" required style="width:90px;">
+          <button class="action green" type="submit" style="flex:1;">Vender</button>
+        </div>
+      </form>
+    </div>
+    <div class="card">
+      <h3>Ventas de hoy</h3>
+      <div id="listaVentas"></div>
+    </div>
+  </section>
+
+  <!-- INVENTARIO -->
+  <section class="view" id="v-inventario">
+    <div class="fab"><button class="action" onclick="toggleForm('fProducto')">+ Nuevo producto</button></div>
+    <div class="card" id="fProductoWrap" style="display:none;">
+      <h3>Nuevo producto</h3>
+      <form id="fProducto">
+        <input type="text" id="pNombre" placeholder="Nombre" required>
+        <div style="display:flex; gap:8px;">
+          <input type="number" id="pCantidad" placeholder="Cantidad" min="0" required>
+          <input type="number" id="pCosto" placeholder="Costo" min="0" required>
+          <input type="number" id="pPrecio" placeholder="Precio venta" min="0" required>
+        </div>
+        <button class="action" type="submit">Guardar</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3>Disponibles</h3>
+      <div id="listaProductos"></div>
+    </div>
+  </section>
+
+  <!-- FIADOS -->
+  <section class="view" id="v-fiados">
+    <div class="summary">
+      <div class="box"><span class="muted">Total fiado</span><b class="amt red" id="totFiado">$0</b></div>
+    </div>
+    <div class="fab"><button class="action" onclick="toggleForm('fCliente')">+ Nuevo cliente</button></div>
+    <div class="card" id="fClienteWrap" style="display:none;">
+      <h3>Nuevo cliente</h3>
+      <form id="fCliente" class="inline">
+        <input type="text" id="cNombre" placeholder="Nombre" required>
+        <button class="action" type="submit">Agregar</button>
+      </form>
+    </div>
+    <div id="listaClientes"></div>
+  </section>
+
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL = 'https://fqvetpjqprphujorjjzf.supabase.co/rest/v1/';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxdmV0cGpxcHJwaHVqb3JqanpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2OTc3MTcsImV4cCI6MjEwNjI3MzcxN30.-2yL6LfxNTQTnrBydOND6JjxHWVfgwiUDM2kK6W0QLU';
+
+async function sb(path, opts={}){
+  const res = await fetch(SB_URL+path, {
+    ...opts,
+    headers:{
+      'apikey':SB_KEY, 'Authorization':'Bearer '+SB_KEY, 'Content-Type':'application/json',
+      'Prefer': opts.method && opts.method!=='GET' ? 'return=representation' : undefined,
+      ...(opts.headers||{})
+    }
+  });
+  if(!res.ok){ toast('Error: '+(await res.text()).slice(0,80)); throw new Error('sb error'); }
+  return res.status===204 ? null : res.json();
+}
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+function money(n){ return '$'+Math.round(n).toLocaleString('es-CO'); }
+function toggleForm(id){ const w=document.getElementById(id+'Wrap'); w.style.display = w.style.display==='none'?'block':'none'; }
+
+// ---------- Nav ----------
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); document.getElementById('v-'+b.dataset.v).classList.add('active');
+});
+
+const hoy = new Date().toLocaleDateString('sv-SE'); // YYYY-MM-DD
+document.getElementById('fechaHoy').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'});
+
+// ---------- Ventas ----------
+let productosCache = [];
+async function loadProductos(){
+  productosCache = await sb('productos?select=*&order=nombre.asc');
+  const sel = document.getElementById('ventaProd');
+  sel.innerHTML = productosCache.map(p=>`<option value="${p.id}" ${p.cantidad<=0?'disabled':''}>${p.nombre} — ${money(p.precio_venta)} (stock ${p.cantidad})</option>`).join('');
+  renderInventario();
+}
+function renderInventario(){
+  const el = document.getElementById('listaProductos');
+  if(!productosCache.length){ el.innerHTML='<div class="empty">Sin productos</div>'; return; }
+  el.innerHTML = productosCache.map(p=>`
+    <div class="row">
+      <div><b>${p.nombre}</b><br><span class="muted">costo ${money(p.costo)} · gana ${money(p.ganancia)}</span></div>
+      <div style="text-align:right;">
+        <div class="amt">${money(p.precio_venta)}</div>
+        <div class="muted ${p.cantidad<=2?'low':''}">stock: ${p.cantidad}</div>
+      </div>
+    </div>`).join('');
+}
+async function loadVentasHoy(){
+  const ventas = await sb(`ventas?select=*&fecha=eq.${hoy}&order=created_at.desc`);
+  const el = document.getElementById('listaVentas');
+  if(!ventas.length){ el.innerHTML='<div class="empty">Aún no hay ventas hoy</div>'; }
+  else{
+    el.innerHTML = ventas.map(v=>`
+      <div class="row"><div>${v.producto} <span class="muted">x${v.cantidad}</span></div><div class="amt">${money(v.total)}</div></div>`).join('');
+  }
+  document.getElementById('totHoy').textContent = money(ventas.reduce((s,v)=>s+Number(v.total),0));
+  document.getElementById('ganHoy').textContent = money(ventas.reduce((s,v)=>s+Number(v.ganancia),0));
+}
+
+document.getElementById('fVenta').onsubmit = async (e)=>{
+  e.preventDefault();
+  const id = document.getElementById('ventaProd').value;
+  const cant = Number(document.getElementById('ventaCant').value);
+  const p = productosCache.find(x=>x.id==id);
+  if(!p) return;
+  if(cant > p.cantidad){ toast('No hay suficiente stock'); return; }
+  await sb('ventas', {method:'POST', body:JSON.stringify({
+    producto_id:p.id, producto:p.nombre, cantidad:cant, precio_unit:p.precio_venta, costo_unit:p.costo
+  })});
+  await sb(`productos?id=eq.${p.id}`, {method:'PATCH', body:JSON.stringify({cantidad:p.cantidad-cant})});
+  document.getElementById('ventaCant').value = 1;
+  toast('Venta registrada');
+  await loadProductos(); await loadVentasHoy();
+};
+
+document.getElementById('fProducto').onsubmit = async (e)=>{
+  e.preventDefault();
+  await sb('productos', {method:'POST', body:JSON.stringify({
+    nombre:document.getElementById('pNombre').value,
+    cantidad:Number(document.getElementById('pCantidad').value),
+    costo:Number(document.getElementById('pCosto').value),
+    precio_venta:Number(document.getElementById('pPrecio').value)
+  })});
+  e.target.reset(); toggleForm('fProducto'); toast('Producto agregado'); await loadProductos();
+};
+
+// ---------- Fiados ----------
+async function loadClientes(){
+  const clientes = await sb('clientes?select=*,fiados(monto),abonos(monto)&order=nombre.asc');
+  let totalGeneral = 0;
+  const el = document.getElementById('listaClientes');
+  if(!clientes.length){ el.innerHTML='<div class="empty">Sin clientes</div>'; }
+  else{
+    el.innerHTML = clientes.map(c=>{
+      const debe = c.fiados.reduce((s,f)=>s+Number(f.monto),0);
+      const pago = c.abonos.reduce((s,a)=>s+Number(a.monto),0);
+      const saldo = debe - pago; totalGeneral += saldo;
+      return `
+      <div class="card">
+        <div class="row" style="border:none; padding-bottom:4px;">
+          <b>${c.nombre}</b>
+          <span class="amt ${saldo>0?'red':'green'}">${money(saldo)}</span>
+        </div>
+        <form class="inline" onsubmit="return addFiado(event, ${c.id})">
+          <input type="number" min="1" placeholder="Nuevo fiado $" required>
+          <button class="action red" type="submit">Fiar</button>
+        </form>
+        <form class="inline" style="margin-top:6px;" onsubmit="return addAbono(event, ${c.id})">
+          <input type="number" min="1" placeholder="Abono $" required>
+          <button class="action green" type="submit">Abonar</button>
+        </form>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('totFiado').textContent = money(totalGeneral);
+}
+async function addFiado(e, clienteId){
+  e.preventDefault();
+  const monto = Number(e.target.querySelector('input').value);
+  await sb('fiados', {method:'POST', body:JSON.stringify({cliente_id:clienteId, monto, concepto:'Fiado'})});
+  toast('Fiado registrado'); await loadClientes(); return false;
+}
+async function addAbono(e, clienteId){
+  e.preventDefault();
+  const monto = Number(e.target.querySelector('input').value);
+  await sb('abonos', {method:'POST', body:JSON.stringify({cliente_id:clienteId, monto})});
+  toast('Abono registrado'); await loadClientes(); return false;
+}
+document.getElementById('fCliente').onsubmit = async (e)=>{
+  e.preventDefault();
+  await sb('clientes', {method:'POST', body:JSON.stringify({nombre:document.getElementById('cNombre').value})});
+  e.target.reset(); toggleForm('fCliente'); toast('Cliente agregado'); await loadClientes();
+};
+
+(async function init(){
+  await loadProductos();
+  await loadVentasHoy();
+  await loadClientes();
+})();
+</script>
+</body>
+</html>
