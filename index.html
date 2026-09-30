@@ -109,6 +109,35 @@
   .modal label{ display:block; font-size:.8rem; color:var(--inkfaint); margin:8px 0 3px; }
   .modal .btns{ display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
   .modal .btns .sp{ flex:1; }
+
+  /* fotos */
+  .thumb{ width:54px; height:54px; border-radius:8px; border:1.5px dashed var(--inkfaint); background:var(--paper2);
+    display:flex; align-items:center; justify-content:center; font-size:1.4rem; cursor:pointer; flex-shrink:0; overflow:hidden; }
+  .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .vthumb{ width:44px; height:44px; border-radius:7px; object-fit:cover; border:1.5px solid var(--ink); flex-shrink:0; }
+  .bigfoto{ width:100%; max-height:50vh; object-fit:contain; border-radius:8px; background:#fff; border:1px solid var(--line); }
+  .modal select{ width:100%; }
+
+  /* encargos */
+  .enc .desc{ margin:2px 0 4px; }
+  .enc .nums{ display:flex; gap:8px; margin:8px 0 2px; }
+  .enc .nums div{ flex:1; background:var(--paper2); border-radius:8px; padding:6px 8px; text-align:center; font-size:.78rem; color:var(--inkfaint); }
+  .enc .nums b{ display:block; font-size:1rem; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .enc .foot{ display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+  .tag.e-pendiente{ background:var(--amber); } .tag.e-listo{ background:var(--green); }
+  .tag.e-entregado{ background:var(--inkfaint); } .tag.e-cancelado{ background:var(--red); }
+  .late{ color:var(--red); font-weight:600; } .today{ color:var(--amber); font-weight:600; }
+
+  /* buscador con sugerencias */
+  .sg{ position:relative; }
+  .sg-list{ position:absolute; left:0; right:0; top:calc(100% + 2px); z-index:30; background:#fff; border:1.5px solid var(--ink);
+    border-radius:7px; max-height:230px; overflow:auto; box-shadow:2px 3px 0 var(--line); }
+  .sg-it{ display:flex; align-items:center; gap:8px; padding:9px 10px; border-bottom:1px dashed var(--line); cursor:pointer; }
+  .sg-it:last-child{ border-bottom:none; }
+  .sg-it:hover,.sg-it:active{ background:var(--paper2); }
+  .sg-it img{ width:34px; height:34px; border-radius:6px; object-fit:cover; flex-shrink:0; }
+  .sg-it span:first-of-type{ flex:1; }
+  input[type=date]{ min-height:46px; }
 </style>
 </head>
 <body>
@@ -121,6 +150,7 @@
 <nav>
   <button data-v="ventas" class="active">Ventas</button>
   <button data-v="inventario">Stock</button>
+  <button data-v="encargos">Encargos</button>
   <button data-v="fiados">Fiados</button>
 </nav>
 
@@ -135,7 +165,7 @@
     <div class="card">
       <h3>Registrar venta</h3>
       <form id="fVenta">
-        <select id="ventaProd" required></select>
+        <div style="display:flex; gap:8px; align-items:center;"><img id="ventaFoto" class="vthumb" alt="" style="display:none;"><select id="ventaProd" required></select></div>
         <div style="display:flex; gap:8px;">
           <input type="number" id="ventaCant" min="1" value="1" required style="width:90px;" title="Cantidad">
           <input type="number" id="ventaPrecio" min="0" placeholder="Precio unidad" required title="Precio por unidad (editable)">
@@ -178,6 +208,8 @@
           <input type="number" id="pCosto" placeholder="Costo" min="0" required>
           <input type="number" id="pPrecio" placeholder="Precio venta" min="0" required>
         </div>
+        <label class="muted" for="pFoto">Foto (opcional)</label>
+        <input type="file" id="pFoto" accept="image/*">
         <button class="action" type="submit">Guardar</button>
       </form>
     </div>
@@ -220,8 +252,43 @@
     <div id="listaClientes"></div>
   </section>
 
+  <!-- ENCARGOS -->
+  <section class="view" id="v-encargos">
+    <div class="summary">
+      <div class="box"><span class="muted">Encargos activos</span><b id="encPend">0</b></div>
+      <div class="box"><span class="muted">Por cobrar</span><b class="amt red" id="encCobrar">$0</b></div>
+    </div>
+    <div class="fab"><button class="action" onclick="toggleForm('fEncargo')">+ Nuevo encargo</button></div>
+    <div class="card" id="fEncargoWrap" style="display:none;">
+      <h3>Nuevo encargo</h3>
+      <form id="fEncargo">
+        <input type="text" id="eCliente" placeholder="Cliente: busca o escribe uno nuevo" required autocomplete="off">
+        <input type="text" id="eDesc" placeholder="Producto: busca o escribe uno nuevo" required autocomplete="off">
+        <div style="display:flex; gap:8px;">
+          <input type="number" id="eCant" min="1" value="1" required title="Cantidad" style="width:80px;">
+          <input type="number" id="eTotal" min="0" placeholder="Precio total" required>
+          <input type="number" id="eAbono" min="0" placeholder="Abono" >
+        </div>
+        <label class="muted" for="eFecha">Fecha de entrega</label>
+        <input type="date" id="eFecha">
+        <input type="text" id="eNotas" placeholder="Notas (opcional)">
+        <button class="action" type="submit">Guardar encargo</button>
+      </form>
+    </div>
+    <div class="flt">
+      <select id="encFiltro">
+        <option value="activos">Activos (pendientes y listos)</option>
+        <option value="todos">Todos</option>
+        <option value="entregado">Entregados</option>
+        <option value="cancelado">Cancelados</option>
+      </select>
+    </div>
+    <div id="listaEncargos"></div>
+  </section>
+
 </main>
 
+<input type="file" id="fileFoto" accept="image/*" hidden>
 <div class="ov" id="ov"><div class="modal" id="modal"></div></div>
 <div class="toast" id="toast"></div>
 
@@ -248,29 +315,62 @@ function toast(msg){
 function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function money(n){ return '$'+Math.round(Number(n)||0).toLocaleString('es-CO'); }
 function toggleForm(id){ const w=document.getElementById(id+'Wrap'); w.style.display = w.style.display==='none'?'block':'none'; }
+const SB_BASE = SB_URL.replace('/rest/v1/','');
+function reducirImagen(file, max=900){
+  return new Promise((ok,fail)=>{
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = ()=>{
+      const k = Math.min(1, max/Math.max(img.width,img.height));
+      const c = document.createElement('canvas'); c.width=Math.round(img.width*k); c.height=Math.round(img.height*k);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b=>b?ok(b):fail(new Error('img')),'image/jpeg',0.82);
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); fail(new Error('img')); };
+    img.src = url;
+  });
+}
+async function subirFoto(file, id){
+  let blob;
+  try{ blob = await reducirImagen(file); }catch(_){ toast('No se pudo leer esa imagen'); throw new Error('img'); }
+  const path = `productos/${id}-${Date.now()}.jpg`;
+  const res = await fetch(`${SB_BASE}/storage/v1/object/fotos/${path}`, {
+    method:'POST', headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'image/jpeg','x-upsert':'true'}, body:blob });
+  if(!res.ok){ toast('No se pudo subir la foto'); throw new Error('upload'); }
+  return `${SB_BASE}/storage/v1/object/public/fotos/${path}`;
+}
+function borrarFoto(url){ // mejor esfuerzo: si falla no pasa nada
+  const path = (url||'').split('/object/public/fotos/')[1]; if(!path) return;
+  fetch(`${SB_BASE}/storage/v1/object/fotos/${path}`, {method:'DELETE', headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).catch(()=>{});
+}
 function fechaCorta(f){ if(!f) return ''; const [y,m,d]=f.split('-'); return `${d}/${m}`; }
 
 // ---------- Modal genérico ----------
-// fields: [{k,label,type,value,min}] · onSave(values) · onDelete() opcional
-function openModal({title, fields=[], saveText='Guardar', onSave, onDelete, deleteText='Eliminar', note}){
+// fields: [{k,label,type('text'|'number'|'date'|'select'),value,min,options}] · onSave(values) · onDelete() opcional
+// extra: [{text,cls,onClick}] botones adicionales · html: contenido libre bajo el título
+function openModal({title, fields=[], saveText='Guardar', onSave, onDelete, deleteText='Eliminar', note, html='', extra=[], cancelText='Cancelar'}){
   const m = document.getElementById('modal');
-  m.innerHTML = `<h3>${esc(title)}</h3>` + (note?`<p class="muted" style="margin:0 0 6px;">${esc(note)}</p>`:'') +
-    fields.map(f=>`<label for="mf_${f.k}">${esc(f.label)}</label>
-      <input id="mf_${f.k}" type="${f.type||'text'}" value="${esc(f.value??'')}" ${f.min!=null?`min="${f.min}"`:''} ${f.step?`step="${f.step}"`:''}>`).join('') +
+  const campo = f => f.type==='select'
+    ? `<select id="mf_${f.k}">${f.options.map(o=>`<option value="${esc(o[0])}" ${o[0]===f.value?'selected':''}>${esc(o[1])}</option>`).join('')}</select>`
+    : `<input id="mf_${f.k}" type="${f.type||'text'}" value="${esc(f.value??'')}" ${f.min!=null?`min="${f.min}"`:''} ${f.step?`step="${f.step}"`:''}>`;
+  m.innerHTML = `<h3>${esc(title)}</h3>` + (note?`<p class="muted" style="margin:0 0 6px;">${esc(note)}</p>`:'') + html +
+    fields.map(f=>`<label for="mf_${f.k}">${esc(f.label)}</label>${campo(f)}`).join('') +
     `<div class="btns">
       ${onDelete?`<button class="action red" id="mDel" type="button">${esc(deleteText)}</button>`:''}
       <span class="sp"></span>
-      <button class="action ghost" id="mCancel" type="button">Cancelar</button>
+      ${extra.map((x,i)=>`<button class="action ${x.cls||''}" data-x="${i}" type="button">${esc(x.text)}</button>`).join('')}
+      <button class="action ghost" id="mCancel" type="button">${esc(cancelText)}</button>
       ${onSave?`<button class="action" id="mSave" type="button">${esc(saveText)}</button>`:''}
     </div>`;
   const ov = document.getElementById('ov'); ov.classList.add('show');
-  const first = m.querySelector('input'); if(first){ first.focus(); first.select?.(); }
+  const first = m.querySelector('input,select'); if(first && first.tagName==='INPUT'){ first.focus(); first.select?.(); }
   const close = ()=>ov.classList.remove('show');
   m.querySelector('#mCancel').onclick = close;
   const get = ()=>Object.fromEntries(fields.map(f=>[f.k, document.getElementById('mf_'+f.k).value]));
   const save = async()=>{ if(await onSave(get())!==false) close(); };
   if(onSave) m.querySelector('#mSave').onclick = save;
   if(onDelete) m.querySelector('#mDel').onclick = async()=>{ if(await onDelete()!==false) close(); };
+  m.querySelectorAll('[data-x]').forEach(btn=>btn.onclick = async()=>{ if(await extra[btn.dataset.x].onClick(get())!==false) close(); });
   m.onkeydown = e=>{ if(e.key==='Enter' && onSave && e.target.tagName==='INPUT'){ e.preventDefault(); save(); } if(e.key==='Escape') close(); };
 }
 document.getElementById('ov').addEventListener('mousedown',e=>{ if(e.target.id==='ov') e.target.classList.remove('show'); });
@@ -304,6 +404,8 @@ function renderSelectVenta(){
 function syncPrecioVenta(){
   const p = productosCache.find(x=>x.id==document.getElementById('ventaProd').value);
   document.getElementById('ventaPrecio').value = p ? p.precio_venta : '';
+  const img = document.getElementById('ventaFoto');
+  if(p && p.foto_url){ img.src = p.foto_url; img.style.display='block'; } else { img.style.display='none'; }
 }
 document.getElementById('ventaProd').onchange = syncPrecioVenta;
 
@@ -328,6 +430,7 @@ function renderInventario(){
   el.innerHTML = lista.map(p=>`
     <div class="prow" data-id="${p.id}">
       <div class="top">
+        <div class="thumb" data-a="foto" title="Foto del producto">${p.foto_url?`<img src="${esc(p.foto_url)}" alt="" loading="lazy">`:'📷'}</div>
         <input type="text" data-f="nombre" value="${esc(p.nombre)}" aria-label="Nombre">
         <button class="ib del" data-a="del" title="Eliminar producto">🗑</button>
       </div>
@@ -381,9 +484,17 @@ document.getElementById('listaProductos').addEventListener('keydown', e=>{
 });
 // botones de la fila
 document.getElementById('listaProductos').addEventListener('click', async e=>{
-  const b = e.target.closest('button[data-a]'); if(!b) return;
+  const b = e.target.closest('[data-a]'); if(!b) return;
   const id = b.closest('.prow').dataset.id; const p = productosCache.find(x=>x.id==id); if(!p) return;
   const a = b.dataset.a;
+  if(a==='foto'){
+    if(!p.foto_url){ pedirFoto(id); return; }
+    openModal({ title:p.nombre, html:`<img class="bigfoto" src="${esc(p.foto_url)}" alt="">`, cancelText:'Cerrar',
+      extra:[{text:'Cambiar foto', onClick:()=>{ pedirFoto(id); }}],
+      deleteText:'Quitar foto',
+      onDelete: async()=>{ const viejo=p.foto_url; await patchProducto(id,{foto_url:null}); borrarFoto(viejo); renderInventario(); renderSelectVenta(); toast('Foto quitada'); }});
+    return;
+  }
   if(a==='plus' || a==='minus'){
     const n = p.cantidad + (a==='plus'?1:-1); if(n<0) return;
     try{ await patchProducto(id,{cantidad:n}); refreshRow(id); }catch(_){}
@@ -403,18 +514,38 @@ document.getElementById('listaProductos').addEventListener('click', async e=>{
   }
   if(a==='del'){
     openModal({ title:'Eliminar producto', note:`Se borra "${p.nombre}" del stock. Las ventas ya hechas se conservan.`,
-      onDelete: async()=>{ await sb(`productos?id=eq.${id}`,{method:'DELETE'}); toast('Producto eliminado'); await loadProductos(); await loadVentas(); }});
+      onDelete: async()=>{ const foto=p.foto_url; await sb(`productos?id=eq.${id}`,{method:'DELETE'}); if(foto) borrarFoto(foto); toast('Producto eliminado'); await loadProductos(); await loadVentas(); }});
   }
 });
 
+let fotoTarget = null;
+const fileFoto = document.getElementById('fileFoto');
+function pedirFoto(id){ fotoTarget=id; fileFoto.value=''; fileFoto.click(); }
+fileFoto.onchange = async()=>{
+  const file = fileFoto.files[0]; const id = fotoTarget; if(!file || !id) return;
+  const p = productosCache.find(x=>x.id==id); if(!p) return;
+  toast('Subiendo foto…');
+  try{
+    const url = await subirFoto(file,id); const viejo = p.foto_url;
+    await patchProducto(id,{foto_url:url});
+    if(viejo) borrarFoto(viejo);
+    renderInventario(); renderSelectVenta(); toast('Foto guardada');
+  }catch(_){}
+};
+
 document.getElementById('fProducto').onsubmit = async (e)=>{
   e.preventDefault();
-  await sb('productos', {method:'POST', body:JSON.stringify({
+  const file = document.getElementById('pFoto').files[0];
+  const r = await sb('productos', {method:'POST', body:JSON.stringify({
     nombre:document.getElementById('pNombre').value.trim(),
     cantidad:Number(document.getElementById('pCantidad').value),
     costo:Number(document.getElementById('pCosto').value),
     precio_venta:Number(document.getElementById('pPrecio').value)
   })});
+  if(file && r && r[0]){
+    try{ const url = await subirFoto(file, r[0].id);
+      await sb(`productos?id=eq.${r[0].id}`,{method:'PATCH',body:JSON.stringify({foto_url:url})}); }catch(_){}
+  }
   e.target.reset(); toggleForm('fProducto'); toast('Producto agregado'); await loadProductos();
 };
 
@@ -645,10 +776,186 @@ document.getElementById('fCliente').onsubmit = async (e)=>{
   e.target.reset(); toggleForm('fCliente'); toast('Cliente agregado'); await loadClientes();
 };
 
+// =====================================================
+//  ENCARGOS
+// =====================================================
+let encargosCache = [];
+const ESTADOS = [['pendiente','Pendiente'],['listo','Listo'],['entregado','Entregado'],['cancelado','Cancelado']];
+const SIGUIENTE = { pendiente:['listo','✔ Marcar listo'], listo:['entregado','📦 Marcar entregado'] };
+const saldoEnc = e => Math.max(0, Number(e.total)-Number(e.abono));
+
+async function loadEncargos(){
+  encargosCache = await sb('encargos?select=*&order=fecha_entrega.asc.nullslast,created_at.desc');
+  renderEncargos();
+}
+function entregaHTML(e){
+  if(!e.fecha_entrega) return '<span class="muted">Sin fecha de entrega</span>';
+  const activo = e.estado==='pendiente'||e.estado==='listo';
+  if(activo && e.fecha_entrega<hoy) return `<span class="late">Entrega atrasada · ${fechaCorta(e.fecha_entrega)}</span>`;
+  if(activo && e.fecha_entrega===hoy) return '<span class="today">Se entrega hoy</span>';
+  return `<span class="muted">Entrega: ${fechaCorta(e.fecha_entrega)}</span>`;
+}
+function renderEncargos(){
+  const activos = encargosCache.filter(e=>e.estado==='pendiente'||e.estado==='listo');
+  document.getElementById('encPend').textContent = activos.length;
+  document.getElementById('encCobrar').textContent = money(encargosCache.filter(e=>e.estado!=='cancelado').reduce((s,e)=>s+saldoEnc(e),0));
+  const f = document.getElementById('encFiltro').value;
+  const lista = f==='activos' ? activos : f==='todos' ? encargosCache : encargosCache.filter(e=>e.estado===f);
+  const el = document.getElementById('listaEncargos');
+  if(!lista.length){ el.innerHTML = '<div class="empty">No hay encargos aquí</div>'; return; }
+  el.innerHTML = lista.map(e=>{
+    const saldo = saldoEnc(e); const sig = SIGUIENTE[e.estado];
+    return `
+    <div class="card enc" data-id="${e.id}">
+      <div class="row" style="border:none; padding-bottom:2px;">
+        <div><b>${esc(e.cliente)}</b> <span class="tag e-${e.estado}">${esc(ESTADOS.find(x=>x[0]===e.estado)[1])}</span></div>
+        <div class="acts">
+          <button class="ib" data-a="edit" title="Editar">✎</button>
+          <button class="ib del" data-a="del" title="Eliminar">🗑</button>
+        </div>
+      </div>
+      <div class="desc">${esc(e.descripcion)} <span class="muted">x${e.cantidad}</span></div>
+      ${e.notas?`<div class="muted">${esc(e.notas)}</div>`:''}
+      <div>${entregaHTML(e)}</div>
+      <div class="nums">
+        <div>Total<b>${money(e.total)}</b></div>
+        <div>Abonado<b>${money(e.abono)}</b></div>
+        <div>Debe<b class="${saldo>0?'amt red':'amt green'}">${money(saldo)}</b></div>
+      </div>
+      <div class="foot">
+        ${saldo>0 && e.estado!=='cancelado'?'<button class="ib ok" data-a="abonar">+ Abonar</button>':''}
+        ${sig?`<button class="ib" data-a="next">${sig[1]}</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+document.getElementById('encFiltro').onchange = renderEncargos;
+
+document.getElementById('fEncargo').onsubmit = async (ev)=>{
+  ev.preventDefault();
+  const total = Number(document.getElementById('eTotal').value);
+  const abono = Number(document.getElementById('eAbono').value)||0;
+  if(abono>total){ toast('El abono no puede ser mayor al total'); return; }
+  await sb('encargos',{method:'POST',body:JSON.stringify({
+    cliente:document.getElementById('eCliente').value.trim(),
+    descripcion:document.getElementById('eDesc').value.trim(),
+    cantidad:Math.round(Number(document.getElementById('eCant').value))||1,
+    total, abono,
+    fecha_entrega:document.getElementById('eFecha').value||null,
+    notas:document.getElementById('eNotas').value.trim()||null
+  })});
+  ev.target.reset(); toggleForm('fEncargo'); toast('Encargo guardado'); await loadEncargos();
+};
+
+async function cambiarEstado(e, estado){
+  await sb(`encargos?id=eq.${e.id}`,{method:'PATCH',body:JSON.stringify({estado})});
+  toast(estado==='listo'?'Encargo listo':'Encargo entregado'); await loadEncargos();
+}
+async function fiarSaldo(e){
+  const saldo = saldoEnc(e);
+  let c = clientesCache.find(x=>x.nombre.trim().toLowerCase()===e.cliente.trim().toLowerCase());
+  if(!c){ const r = await sb('clientes',{method:'POST',body:JSON.stringify({nombre:e.cliente.trim()})}); c = r[0]; }
+  await sb('fiados',{method:'POST',body:JSON.stringify({cliente_id:c.id, monto:saldo, concepto:'Encargo: '+e.descripcion})});
+  await sb(`encargos?id=eq.${e.id}`,{method:'PATCH',body:JSON.stringify({estado:'entregado', abono:Number(e.total)})});
+  toast('Entregado y saldo pasado a fiados'); await loadClientes(); await loadEncargos();
+}
+
+document.getElementById('listaEncargos').addEventListener('click', ev=>{
+  const b = ev.target.closest('button[data-a]'); if(!b) return;
+  const id = b.closest('.enc').dataset.id; const e = encargosCache.find(x=>x.id==id); if(!e) return;
+  const a = b.dataset.a; const saldo = saldoEnc(e);
+  if(a==='abonar'){
+    openModal({ title:'Abonar a '+e.cliente, note:`Debe ${money(saldo)}.`,
+      fields:[{k:'monto',label:'Monto del abono',type:'number',value:saldo,min:1}], saveText:'Abonar',
+      onSave: async v=>{
+        const m = Number(v.monto);
+        if(!(m>0)){ toast('Monto no válido'); return false; }
+        if(m>saldo){ toast('Es más de lo que debe'); return false; }
+        await sb(`encargos?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({abono:Number(e.abono)+m})});
+        toast('Abono registrado'); await loadEncargos();
+      }});
+  }
+  if(a==='next'){
+    const nuevo = SIGUIENTE[e.estado][0];
+    if(nuevo==='entregado' && saldo>0){
+      openModal({ title:'Entregar encargo', note:`${e.cliente} todavía debe ${money(saldo)}. ¿Qué hacemos con ese saldo?`,
+        saveText:'Solo entregar', onSave: ()=>cambiarEstado(e,'entregado'),
+        extra:[{text:'Entregar y fiar el saldo', cls:'green', onClick:()=>fiarSaldo(e)}] });
+    } else cambiarEstado(e,nuevo);
+  }
+  if(a==='edit'){
+    openModal({ title:'Editar encargo', fields:[
+        {k:'cliente',label:'Cliente',value:e.cliente},
+        {k:'descripcion',label:'Qué encargó',value:e.descripcion},
+        {k:'cantidad',label:'Cantidad',type:'number',value:e.cantidad,min:1},
+        {k:'total',label:'Precio total',type:'number',value:Number(e.total),min:0},
+        {k:'abono',label:'Abonado',type:'number',value:Number(e.abono),min:0},
+        {k:'fecha_entrega',label:'Fecha de entrega',type:'date',value:e.fecha_entrega||''},
+        {k:'estado',label:'Estado',type:'select',value:e.estado,options:ESTADOS},
+        {k:'notas',label:'Notas',value:e.notas||''}],
+      onSave: async v=>{
+        const total=Number(v.total)||0, abono=Number(v.abono)||0;
+        if(!v.cliente.trim()||!v.descripcion.trim()){ toast('Falta cliente o descripción'); return false; }
+        if(abono>total){ toast('El abono no puede ser mayor al total'); return false; }
+        await sb(`encargos?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({
+          cliente:v.cliente.trim(), descripcion:v.descripcion.trim(), cantidad:Math.round(Number(v.cantidad))||1,
+          total, abono, fecha_entrega:v.fecha_entrega||null, estado:v.estado, notas:v.notas.trim()||null })});
+        toast('Encargo actualizado'); await loadEncargos();
+      }});
+  }
+  if(a==='del'){
+    openModal({ title:'Eliminar encargo', note:`${e.cliente}: ${e.descripcion}. No se puede deshacer.`,
+      onDelete: async()=>{ await sb(`encargos?id=eq.${id}`,{method:'DELETE'}); toast('Encargo eliminado'); await loadEncargos(); }});
+  }
+});
+
+// ---------- Buscador con sugerencias (cliente y producto del encargo) ----------
+const norm = t=>String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+function attachSuggest(input, getItems, onPick){
+  const wrap = document.createElement('div'); wrap.className='sg';
+  input.parentNode.insertBefore(wrap,input); wrap.appendChild(input);
+  const list = document.createElement('div'); list.className='sg-list'; list.style.display='none'; wrap.appendChild(list);
+  const hide = ()=>{ list.style.display='none'; };
+  const show = ()=>{
+    const q = norm(input.value.trim());
+    const items = getItems().filter(it=>!q || norm(it.label).includes(q)).slice(0,8);
+    if(!items.length){ hide(); return; }
+    list._items = items;
+    list.innerHTML = items.map((it,i)=>`<div class="sg-it" data-i="${i}">${it.img?`<img src="${esc(it.img)}" alt="">`:''}<span>${esc(it.label)}</span>${it.sub?`<span class="muted">${esc(it.sub)}</span>`:''}</div>`).join('');
+    list.style.display='block';
+  };
+  input.addEventListener('input',show); input.addEventListener('focus',show);
+  input.addEventListener('blur',()=>setTimeout(hide,150));
+  list.addEventListener('pointerdown',e=>{
+    const it = e.target.closest('.sg-it'); if(!it) return; e.preventDefault();
+    const item = list._items[it.dataset.i]; input.value = item.label; hide(); if(onPick) onPick(item);
+  });
+}
+(function(){
+  const eCant=document.getElementById('eCant'), eTotal=document.getElementById('eTotal'), eDesc=document.getElementById('eDesc');
+  attachSuggest(document.getElementById('eCliente'), ()=>{
+    const nombres = new Map();
+    clientesCache.forEach(c=>nombres.set(norm(c.nombre),c.nombre));
+    encargosCache.forEach(e=>{ if(!nombres.has(norm(e.cliente))) nombres.set(norm(e.cliente),e.cliente); });
+    return [...nombres.values()].sort((a,b)=>a.localeCompare(b,'es')).map(n=>({label:n}));
+  });
+  attachSuggest(eDesc, ()=>productosCache.map(p=>({label:p.nombre, sub:money(p.precio_venta), img:p.foto_url, p})), it=>{
+    eTotal.value = Number(it.p.precio_venta)*(Math.round(Number(eCant.value))||1); eTotal.dataset.auto='1';
+  });
+  // si el total lo llenó el producto, se recalcula al cambiar la cantidad; si lo escribes tú, se respeta
+  eTotal.addEventListener('input',()=>{ delete eTotal.dataset.auto; });
+  eCant.addEventListener('input',()=>{
+    const p = productosCache.find(x=>norm(x.nombre)===norm(eDesc.value));
+    if(p && (eTotal.dataset.auto==='1' || !eTotal.value)){ eTotal.value = Number(p.precio_venta)*(Math.round(Number(eCant.value))||1); eTotal.dataset.auto='1'; }
+  });
+  document.getElementById('fEncargo').addEventListener('reset',()=>{ delete eTotal.dataset.auto; });
+})();
+
 (async function init(){
   await loadProductos();
   await loadVentas();
   await loadClientes();
+  await loadEncargos();
 })();
 </script>
 </body>
