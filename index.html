@@ -138,6 +138,13 @@
   .sg-it img{ width:34px; height:34px; border-radius:6px; object-fit:cover; flex-shrink:0; }
   .sg-it span:first-of-type{ flex:1; }
   input[type=date]{ min-height:46px; }
+
+  /* medio de pago */
+  .pagos{ display:flex; gap:6px; }
+  .pay{ flex:1; padding:10px 6px; border:1.5px solid var(--ink); background:#fff; border-radius:7px; font-family:inherit; font-size:.95rem; font-weight:600; cursor:pointer; color:var(--ink); }
+  .pay.on{ background:var(--ink); color:var(--paper); }
+  .tag.m-efectivo{ background:var(--green); } .tag.m-llave{ background:#3B6EA5; } .tag.m-fiado{ background:var(--red); }
+  .summary.sm .box b{ font-size:1.05rem; }
 </style>
 </head>
 <body>
@@ -162,10 +169,21 @@
       <div class="box"><span class="muted" id="lblVendido">Vendido hoy</span><b id="totHoy">$0</b></div>
       <div class="box"><span class="muted" id="lblGanancia">Ganancia hoy</span><b id="ganHoy">$0</b></div>
     </div>
+    <div class="summary sm">
+      <div class="box"><span class="muted">💵 Efectivo</span><b id="medEfe">$0</b></div>
+      <div class="box"><span class="muted">📲 Llave</span><b id="medLla">$0</b></div>
+      <div class="box"><span class="muted">📒 Fiado</span><b id="medFia">$0</b></div>
+    </div>
     <div class="card">
       <h3>Registrar venta</h3>
       <form id="fVenta">
         <div style="display:flex; gap:8px; align-items:center;"><img id="ventaFoto" class="vthumb" alt="" style="display:none;"><select id="ventaProd" required></select></div>
+        <div class="pagos" id="ventaPagos">
+          <button type="button" class="pay on" data-m="efectivo">💵 Efectivo</button>
+          <button type="button" class="pay" data-m="llave">📲 Llave</button>
+          <button type="button" class="pay" data-m="fiado">📒 Fiado</button>
+        </div>
+        <input type="text" id="ventaCliente" placeholder="¿A quién se le fía? Busca o escribe uno nuevo" autocomplete="off">
         <div style="display:flex; gap:8px;">
           <input type="number" id="ventaCant" min="1" value="1" required style="width:90px;" title="Cantidad">
           <input type="number" id="ventaPrecio" min="0" placeholder="Precio unidad" required title="Precio por unidad (editable)">
@@ -182,6 +200,12 @@
           <option value="7">Últimos 7 días</option>
           <option value="mes">Este mes</option>
           <option value="todo">Todas</option>
+        </select>
+        <select id="ventaMedioFiltro">
+          <option value="todos">Todos los medios</option>
+          <option value="efectivo">Solo efectivo</option>
+          <option value="llave">Solo llave</option>
+          <option value="fiado">Solo fiado</option>
         </select>
       </div>
       <div id="listaVentas"></div>
@@ -580,30 +604,71 @@ function desdePeriodo(){
   if(p==='mes'){ return hoy.slice(0,8)+'01'; }
   return null;
 }
+const MEDIOS = {efectivo:'Efectivo', llave:'Llave', fiado:'Fiado'};
+function clienteDeFiado(fid){
+  if(!fid) return '';
+  for(const c of clientesCache){ if(c.fiados.some(f=>f.id===fid)) return c.nombre; }
+  return '';
+}
+async function clientePorNombre(nom){
+  nom = nom.trim();
+  let c = clientesCache.find(x=>norm(x.nombre)===norm(nom));
+  if(!c){
+    const r = await sb('clientes',{method:'POST',body:JSON.stringify({nombre:nom})});
+    c = r[0]; clientesCache.push({...c, fiados:[], abonos:[]});
+  }
+  return c;
+}
 async function loadVentas(){
   const desde = desdePeriodo();
   ventasCache = await sb(`ventas?select=*${desde?`&fecha=gte.${desde}`:''}&order=created_at.desc`);
+  renderVentas();
+}
+function renderVentas(){
   const per = document.getElementById('ventaPeriodo').value;
   const nom = {hoy:'hoy','7':'7 días',mes:'este mes',todo:'total'}[per];
   document.getElementById('lblVendido').textContent = 'Vendido '+nom;
   document.getElementById('lblGanancia').textContent = 'Ganancia '+nom;
+  const por = {efectivo:0, llave:0, fiado:0};
+  ventasCache.forEach(v=>{ por[v.medio_pago] = (por[v.medio_pago]||0)+Number(v.total); });
+  document.getElementById('medEfe').textContent = money(por.efectivo);
+  document.getElementById('medLla').textContent = money(por.llave);
+  document.getElementById('medFia').textContent = money(por.fiado);
+  const filtro = document.getElementById('ventaMedioFiltro').value;
+  const lista = filtro==='todos' ? ventasCache : ventasCache.filter(v=>v.medio_pago===filtro);
   const el = document.getElementById('listaVentas');
-  if(!ventasCache.length){ el.innerHTML='<div class="empty">No hay ventas en este periodo</div>'; }
+  if(!lista.length){ el.innerHTML='<div class="empty">No hay ventas en este periodo</div>'; }
   else{
-    el.innerHTML = ventasCache.map(v=>`
+    el.innerHTML = lista.map(v=>{
+      const cli = v.medio_pago==='fiado' ? clienteDeFiado(v.fiado_id) : '';
+      return `
       <div class="row" data-id="${v.id}">
-        <div>${esc(v.producto)} <span class="muted">x${v.cantidad} · ${money(v.precio_unit)} c/u${per!=='hoy'?' · '+fechaCorta(v.fecha):''}</span></div>
+        <div>${esc(v.producto)} <span class="tag m-${v.medio_pago}">${MEDIOS[v.medio_pago]||v.medio_pago}${cli?' · '+esc(cli):''}</span>
+          <div class="muted">x${v.cantidad} · ${money(v.precio_unit)} c/u${per!=='hoy'?' · '+fechaCorta(v.fecha):''}</div></div>
         <div class="acts">
           <span class="amt" style="align-self:center;">${money(v.total)}</span>
           <button class="ib" data-a="edit" title="Editar">✎</button>
           <button class="ib del" data-a="del" title="Eliminar">🗑</button>
         </div>
-      </div>`).join('');
+      </div>`; }).join('');
   }
   document.getElementById('totHoy').textContent = money(ventasCache.reduce((s,v)=>s+Number(v.total),0));
   document.getElementById('ganHoy').textContent = money(ventasCache.reduce((s,v)=>s+Number(v.ganancia),0));
 }
 document.getElementById('ventaPeriodo').onchange = loadVentas;
+document.getElementById('ventaMedioFiltro').onchange = renderVentas;
+
+let medioVenta = 'efectivo';
+function setMedio(m){
+  medioVenta = m;
+  document.querySelectorAll('#ventaPagos .pay').forEach(x=>x.classList.toggle('on', x.dataset.m===m));
+  const c = document.getElementById('ventaCliente'); const w = c.closest('.sg') || c;
+  w.style.display = m==='fiado' ? 'block' : 'none';
+  if(m==='fiado') c.focus(); else c.value='';
+}
+document.getElementById('ventaPagos').addEventListener('click', e=>{
+  const b = e.target.closest('.pay'); if(b) setMedio(b.dataset.m);
+});
 
 document.getElementById('fVenta').onsubmit = async (e)=>{
   e.preventDefault();
@@ -613,13 +678,29 @@ document.getElementById('fVenta').onsubmit = async (e)=>{
   const p = productosCache.find(x=>x.id==id);
   if(!p) return;
   if(cant > p.cantidad){ toast('No hay suficiente stock'); return; }
-  await sb('ventas', {method:'POST', body:JSON.stringify({
-    producto_id:p.id, producto:p.nombre, cantidad:cant, precio_unit:precio, costo_unit:p.costo
-  })});
+  const medio = medioVenta;
+  let fiadoId = null;
+  if(medio==='fiado'){
+    const nom = document.getElementById('ventaCliente').value.trim();
+    if(!nom){ toast('Pon a quién se le fía'); return; }
+    const c = await clientePorNombre(nom);
+    const f = await sb('fiados',{method:'POST',body:JSON.stringify({cliente_id:c.id, monto:cant*precio, concepto:`${p.nombre} x${cant}`})});
+    fiadoId = f[0].id;
+  }
+  try{
+    await sb('ventas', {method:'POST', body:JSON.stringify({
+      producto_id:p.id, producto:p.nombre, cantidad:cant, precio_unit:precio, costo_unit:p.costo, medio_pago:medio, fiado_id:fiadoId
+    })});
+  }catch(err){
+    if(fiadoId) await sb(`fiados?id=eq.${fiadoId}`,{method:'DELETE'}).catch(()=>{});
+    return;
+  }
   await sb(`productos?id=eq.${p.id}`, {method:'PATCH', body:JSON.stringify({cantidad:p.cantidad-cant})});
   document.getElementById('ventaCant').value = 1;
-  toast('Venta registrada');
+  setMedio('efectivo');
+  toast(medio==='fiado'?'Venta fiada registrada':'Venta registrada');
   await loadProductos(); await loadVentas();
+  if(medio==='fiado') await loadClientes();
 };
 
 document.getElementById('listaVentas').addEventListener('click', e=>{
@@ -633,25 +714,40 @@ document.getElementById('listaVentas').addEventListener('click', e=>{
         {k:'cantidad',label:'Cantidad',type:'number',value:v.cantidad,min:1},
         {k:'precio_unit',label:'Precio por unidad',type:'number',value:Number(v.precio_unit),min:0},
         {k:'costo_unit',label:'Costo por unidad',type:'number',value:Number(v.costo_unit),min:0},
+        {k:'medio_pago',label:'Medio de pago',type:'select',value:v.medio_pago,options:Object.entries(MEDIOS)},
+        {k:'cliente',label:'Cliente (solo si es fiado)',value:clienteDeFiado(v.fiado_id)},
         {k:'fecha',label:'Fecha',type:'date',value:v.fecha}],
       onSave: async f=>{
         const cant = Math.round(Number(f.cantidad));
         if(!(cant>0)){ toast('Cantidad no válida'); return false; }
         const delta = cant - v.cantidad; // >0 saca más stock
         if(prod && prod.cantidad - delta < 0){ toast('No hay suficiente stock para ese cambio'); return false; }
+        const nombre = f.producto.trim()||v.producto, precio = Number(f.precio_unit)||0, medio = f.medio_pago;
+        let fiadoId = v.fiado_id;
+        if(medio==='fiado'){
+          if(!f.cliente.trim()){ toast('Pon el cliente del fiado'); return false; }
+          const c = await clientePorNombre(f.cliente);
+          const fb = {cliente_id:c.id, monto:cant*precio, concepto:`${nombre} x${cant}`};
+          if(fiadoId) await sb(`fiados?id=eq.${fiadoId}`,{method:'PATCH',body:JSON.stringify(fb)});
+          else { const r = await sb('fiados',{method:'POST',body:JSON.stringify(fb)}); fiadoId = r[0].id; }
+        } else if(fiadoId){
+          await sb(`fiados?id=eq.${fiadoId}`,{method:'DELETE'}); fiadoId = null;
+        }
         await sb(`ventas?id=eq.${id}`,{method:'PATCH',body:JSON.stringify({
-          producto:f.producto.trim()||v.producto, cantidad:cant, precio_unit:Number(f.precio_unit)||0,
-          costo_unit:Number(f.costo_unit)||0, fecha:f.fecha||v.fecha })});
+          producto:nombre, cantidad:cant, precio_unit:precio, costo_unit:Number(f.costo_unit)||0,
+          medio_pago:medio, fiado_id:fiadoId, fecha:f.fecha||v.fecha })});
         if(prod && delta!==0) await sb(`productos?id=eq.${prod.id}`,{method:'PATCH',body:JSON.stringify({cantidad:prod.cantidad-delta})});
-        toast('Venta actualizada'); await loadProductos(); await loadVentas();
+        toast('Venta actualizada'); await loadProductos(); await loadVentas(); await loadClientes();
       }});
   }
   if(b.dataset.a==='del'){
-    openModal({ title:'Eliminar venta', note:`${v.producto} x${v.cantidad} (${money(v.total)})`+(prod?`. Las ${v.cantidad} unidades vuelven al stock.`:'.'),
+    const cli = v.fiado_id ? clienteDeFiado(v.fiado_id) : '';
+    openModal({ title:'Eliminar venta', note:`${v.producto} x${v.cantidad} (${money(v.total)})`+(prod?`. Las ${v.cantidad} unidades vuelven al stock`:'')+(v.fiado_id?`${prod?' y se quita':'. Se quita'} el fiado${cli?' de '+cli:''}.`:'.'),
       onDelete: async()=>{
         await sb(`ventas?id=eq.${id}`,{method:'DELETE'});
+        if(v.fiado_id) await sb(`fiados?id=eq.${v.fiado_id}`,{method:'DELETE'});
         if(prod) await sb(`productos?id=eq.${prod.id}`,{method:'PATCH',body:JSON.stringify({cantidad:prod.cantidad+v.cantidad})});
-        toast('Venta eliminada'); await loadProductos(); await loadVentas();
+        toast('Venta eliminada'); await loadProductos(); await loadVentas(); await loadClientes();
       }});
   }
 });
@@ -663,7 +759,7 @@ let clientesCache = [];
 const abiertos = new Set();
 async function loadClientes(){
   clientesCache = await sb('clientes?select=*,fiados(id,monto,concepto,fecha,created_at),abonos(id,monto,fecha,created_at)&order=nombre.asc');
-  renderClientes();
+  renderClientes(); renderVentas();
 }
 function renderClientes(){
   let totalGeneral = 0;
@@ -948,6 +1044,8 @@ function attachSuggest(input, getItems, onPick){
     const p = productosCache.find(x=>norm(x.nombre)===norm(eDesc.value));
     if(p && (eTotal.dataset.auto==='1' || !eTotal.value)){ eTotal.value = Number(p.precio_venta)*(Math.round(Number(eCant.value))||1); eTotal.dataset.auto='1'; }
   });
+  attachSuggest(document.getElementById('ventaCliente'), ()=>clientesCache.map(c=>({label:c.nombre})));
+  setMedio('efectivo');
   document.getElementById('fEncargo').addEventListener('reset',()=>{ delete eTotal.dataset.auto; });
 })();
 
